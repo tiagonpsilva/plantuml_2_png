@@ -1,0 +1,88 @@
+@startuml Sequence Diagram Example
+
+' Definição do título e estilo
+title Processo de Empréstimo de Livro
+skinparam SequenceBoxBorderColor #2C3E50
+skinparam SequenceBoxFontColor #2C3E50
+skinparam SequenceBoxBackgroundColor #ECF0F1
+skinparam SequenceArrowColor #2C3E50
+skinparam SequenceLifeLineBorderColor #2C3E50
+skinparam SequenceParticipantBorderColor #2C3E50
+skinparam SequenceParticipantFontColor #2C3E50
+skinparam SequenceParticipantBackgroundColor #3498DB
+
+' Participantes
+actor "Usuário" as Usuario
+participant "Interface" as UI
+participant "ControladorEmprestimo" as Controller
+participant "Livro" as Livro
+participant "ServicoUsuario" as UsuarioService
+database "Banco de Dados" as DB
+
+' Início da sequência
+Usuario -> UI : Solicita empréstimo de livro
+activate UI
+
+UI -> Controller : solicitarEmprestimo(idLivro, idUsuario)
+activate Controller
+
+' Verificação de disponibilidade do livro
+Controller -> Livro : verificarDisponibilidade(idLivro)
+activate Livro
+Livro -> DB : consultar status
+activate DB
+DB --> Livro : retorna status
+deactivate DB
+
+alt Livro disponível
+    Livro --> Controller : livro disponível
+    
+    ' Verificação do status do usuário
+    Controller -> UsuarioService : verificarStatus(idUsuario)
+    activate UsuarioService
+    UsuarioService -> DB : consultar status usuário
+    activate DB
+    DB --> UsuarioService : retorna status
+    deactivate DB
+    
+    alt Usuário apto
+        UsuarioService --> Controller : usuário apto
+        
+        ' Registrar empréstimo
+        Controller -> DB : registrarEmprestimo(idLivro, idUsuario, dataAtual)
+        activate DB
+        DB --> Controller : confirmação
+        deactivate DB
+        
+        ' Atualizar status do livro
+        Controller -> Livro : atualizarStatus(EMPRESTADO)
+        Livro -> DB : atualizar status livro
+        activate DB
+        DB --> Livro : confirmação
+        deactivate DB
+        
+        ' Retornar resultado
+        Controller --> UI : empréstimo realizado com sucesso
+        UI --> Usuario : Empréstimo confirmado
+        note right: Exibe data de devolução prevista
+        
+    else Usuário com pendências
+        UsuarioService --> Controller : usuário bloqueado/com pendências
+        Controller --> UI : empréstimo negado
+        UI --> Usuario : Empréstimo não autorizado
+        note right: Exibe motivo da recusa
+    end
+    
+else Livro indisponível
+    Livro --> Controller : livro não disponível
+    Controller --> UI : livro indisponível
+    UI --> Usuario : Livro não disponível no momento
+    note right: Oferece opção de reserva
+end
+
+deactivate Livro
+deactivate UsuarioService
+deactivate Controller
+deactivate UI
+
+@enduml
