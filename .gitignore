@@ -1,0 +1,16 @@
+# Diretório de saída padrão
+/output/
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Arquivos gerados
+*.png
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos de configuração específicos do usuário
+*.jar
