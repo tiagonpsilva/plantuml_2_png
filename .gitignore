@@ -1,0 +1,36 @@
+# Pastas de saída
+output/
+images/
+out/
+
+# Arquivos gerados
+*.png
+!examples/*.png
+
+# Java
+*.class
+*.jar
+# Mas não ignore o plantuml.jar caso esteja incluído no repositório
+!plantuml.jar
+
+# Sistema operacional
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Arquivos temporários
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+tmp/
+temp/
+
+# Logs
+*.log
+logs/
