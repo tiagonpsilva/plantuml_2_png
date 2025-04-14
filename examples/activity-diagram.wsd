@@ -1,0 +1,63 @@
+@startuml Activity Diagram Example
+title Fluxo de Processamento de Pedidos
+
+|Cliente|
+start
+:Adicionar itens ao carrinho;
+:Revisar pedido;
+:Confirmar pedido;
+|#AntiqueWhite|Sistema de Pedidos|
+:Validar estoque;
+
+if (Estoque disponível?) then (sim)
+  :Reservar itens;
+  :Processar pagamento;
+  
+  if (Pagamento aprovado?) then (sim)
+    :Confirmar pedido;
+    :Notificar equipe de logística;
+    |#LightBlue|Logística|
+    :Preparar itens;
+    :Embalar pedido;
+    :Gerar etiqueta de envio;
+    :Entregar para transportadora;
+    |#LightGreen|Transportadora|
+    :Transportar pedido;
+    :Entregar ao cliente;
+    |Cliente|
+    :Receber pedido;
+    :Confirmar recebimento;
+    |#AntiqueWhite|Sistema de Pedidos|
+    :Finalizar pedido;
+    stop
+  else (não)
+    :Notificar falha no pagamento;
+    |Cliente|
+    :Atualizar método de pagamento;
+    repeat
+    :Tentar novamente;
+    |#AntiqueWhite|Sistema de Pedidos|
+    :Processar pagamento;
+    repeat while (Pagamento aprovado?) is (não) not (sim)
+    ->sim;
+  endif
+else (não)
+  :Notificar indisponibilidade;
+  |Cliente|
+  :Receber notificação;
+  if (Aguardar reposição?) then (sim)
+    |#AntiqueWhite|Sistema de Pedidos|
+    :Adicionar à lista de espera;
+    :Notificar quando disponível;
+    |Cliente|
+    :Receber notificação de disponibilidade;
+    ->Confirmar pedido;
+  else (não)
+    :Cancelar pedido;
+    |#AntiqueWhite|Sistema de Pedidos|
+    :Registrar cancelamento;
+    stop
+  endif
+endif
+
+@enduml
