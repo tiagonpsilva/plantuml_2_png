@@ -1,0 +1,110 @@
+@startuml Class Diagram Example
+
+' Definição do título e estilo
+title Sistema de Gerenciamento de Biblioteca
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #2C3E50
+skinparam ClassBorderColor #2C3E50
+skinparam ClassFontColor #2C3E50
+skinparam ClassBackgroundColor #ECF0F1
+
+' Classe Livro
+class Livro {
+  -id: int
+  -titulo: String
+  -autor: String
+  -isbn: String
+  -publicadoEm: Date
+  -disponivel: boolean
+  +emprestar(): boolean
+  +devolver(): void
+  +verificarDisponibilidade(): boolean
+}
+
+' Classe Usuário
+class Usuario {
+  -id: int
+  -nome: String
+  -email: String
+  -dataCadastro: Date
+  -status: StatusUsuario
+  +emprestarLivro(livro: Livro): boolean
+  +devolverLivro(livro: Livro): void
+  +listarLivrosEmprestados(): List<Livro>
+}
+
+' Enum de status do usuário
+enum StatusUsuario {
+  ATIVO
+  INATIVO
+  BLOQUEADO
+  PENDENTE
+}
+
+' Classe Empréstimo
+class Emprestimo {
+  -id: int
+  -livro: Livro
+  -usuario: Usuario
+  -dataEmprestimo: Date
+  -dataDevolucaoPrevista: Date
+  -dataDevolucaoEfetiva: Date
+  -status: StatusEmprestimo
+  +calcularMulta(): double
+  +renovar(dias: int): boolean
+  +finalizar(): void
+}
+
+' Enum de status do empréstimo
+enum StatusEmprestimo {
+  ATIVO
+  ATRASADO
+  DEVOLVIDO
+  RENOVADO
+}
+
+' Classe Biblioteca
+class Biblioteca {
+  -nome: String
+  -endereco: String
+  -livros: List<Livro>
+  -usuarios: List<Usuario>
+  -emprestimos: List<Emprestimo>
+  +cadastrarLivro(livro: Livro): void
+  +cadastrarUsuario(usuario: Usuario): void
+  +buscarLivroPorTitulo(titulo: String): List<Livro>
+  +buscarLivroPorAutor(autor: String): List<Livro>
+  +buscarLivroPorISBN(isbn: String): Livro
+  +gerarRelatorioEmprestimos(): Relatorio
+}
+
+' Interface Relatorio
+interface Relatorio {
+  +gerarPDF(): void
+  +gerarCSV(): void
+  +enviarPorEmail(email: String): boolean
+}
+
+' Classe concreta RelatorioEmprestimos
+class RelatorioEmprestimos {
+  -dataInicio: Date
+  -dataFim: Date
+  -emprestimos: List<Emprestimo>
+  +filtrarPorPeriodo(inicio: Date, fim: Date): void
+  +filtrarPorUsuario(usuario: Usuario): void
+  +calcularEstatisticas(): Map<String, Object>
+}
+
+' Relacionamentos
+Usuario "1" -- "0..*" Emprestimo : realiza >
+Livro "1" -- "0..*" Emprestimo : é emprestado em >
+Biblioteca "1" *-- "0..*" Livro : contém >
+Biblioteca "1" *-- "0..*" Usuario : gerencia >
+Biblioteca "1" *-- "0..*" Emprestimo : registra >
+Usuario -- StatusUsuario : possui >
+Emprestimo -- StatusEmprestimo : possui >
+RelatorioEmprestimos ..|> Relatorio : implementa
+Biblioteca -- RelatorioEmprestimos : gera >
+
+@enduml
