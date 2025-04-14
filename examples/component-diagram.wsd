@@ -1,0 +1,112 @@
+@startuml Component Diagram Example
+
+' Definição do título e estilo
+title Arquitetura do Sistema de Biblioteca Digital
+skinparam componentStyle uml2
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #2C3E50
+skinparam ComponentBorderColor #2C3E50
+skinparam ComponentFontColor #2C3E50
+skinparam ComponentBackgroundColor #ECF0F1
+skinparam InterfaceBorderColor #2C3E50
+skinparam DatabaseBorderColor #2C3E50
+skinparam DatabaseBackgroundColor #AED6F1
+
+' Definição dos pacotes e componentes
+
+package "Frontend" {
+  [Interface Web] as WebUI
+  [Aplicativo Móvel] as MobileApp
+  [Interface de Admin] as AdminUI
+}
+
+package "API Gateway" {
+  [API Gateway] as Gateway
+  [Load Balancer] as LB
+  [Cache] as Cache
+  [Rate Limiter] as RateLimiter
+}
+
+package "Microserviços" {
+  [Serviço de Usuários] as UserService
+  [Serviço de Catálogo] as CatalogService
+  [Serviço de Empréstimos] as LoanService
+  [Serviço de Busca] as SearchService
+  [Serviço de Notificação] as NotificationService
+  [Serviço de Relatórios] as ReportService
+}
+
+package "Infraestrutura" {
+  database "Banco de Dados Usuários" as UserDB
+  database "Banco de Dados Livros" as BookDB
+  database "Banco de Dados Empréstimos" as LoanDB
+  [Servidor de Índice de Busca] as SearchIndex
+  [Servidor de Armazenamento] as Storage
+  [Serviço de Mensageria] as MessageBroker
+}
+
+package "Externos" {
+  [Serviço de Pagamento] as PaymentService
+  [Serviço de Email] as EmailService
+  [Serviço de SMS] as SMSService
+}
+
+' Definição das interfaces
+interface "REST API" as UserAPI
+interface "REST API" as CatalogAPI
+interface "REST API" as LoanAPI
+interface "REST API" as SearchAPI
+interface "REST API" as NotificationAPI
+interface "REST API" as ReportAPI
+interface "Gateway API" as GatewayAPI
+
+' Definição das relações
+
+' Relações do Frontend
+WebUI --> GatewayAPI
+MobileApp --> GatewayAPI
+AdminUI --> GatewayAPI
+
+' Relações do Gateway
+Gateway -- GatewayAPI
+Gateway --> UserAPI
+Gateway --> CatalogAPI
+Gateway --> LoanAPI
+Gateway --> SearchAPI
+Gateway --> NotificationAPI
+Gateway --> ReportAPI
+Gateway --> LB : usa
+Gateway --> Cache : usa
+Gateway --> RateLimiter : usa
+
+' Relações dos Microserviços
+UserService -- UserAPI
+CatalogService -- CatalogAPI
+LoanService -- LoanAPI
+SearchService -- SearchAPI
+NotificationService -- NotificationAPI
+ReportService -- ReportAPI
+
+' Relações com Banco de Dados
+UserService --> UserDB : CRUD
+CatalogService --> BookDB : CRUD
+LoanService --> LoanDB : CRUD
+SearchService --> SearchIndex : consulta/atualiza
+CatalogService --> Storage : armazena/recupera
+ReportService --> UserDB : consulta
+ReportService --> BookDB : consulta
+ReportService --> LoanDB : consulta
+
+' Relações entre Microserviços
+CatalogService ..> MessageBroker : publica
+LoanService ..> MessageBroker : publica
+UserService ..> MessageBroker : publica
+SearchService ..> MessageBroker : consome
+NotificationService ..> MessageBroker : consome
+
+' Relações com Serviços Externos
+NotificationService --> EmailService : envia emails
+NotificationService --> SMSService : envia SMS
+LoanService --> PaymentService : processa multas
+
+@enduml
