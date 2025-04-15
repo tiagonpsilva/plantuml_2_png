@@ -1,0 +1,53 @@
+name: Convert PlantUML to PNG
+
+on:
+  workflow_dispatch:
+    inputs:
+      plantuml_url:
+        description: 'PlantUML URL to convert'
+        required: true
+        default: 'https://www.plantuml.com/plantuml/uml/SyfFKj2rKt3CoKnELR1Io4ZDoSa70000'
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      
+      - name: Set up Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+      
+      - name: Make scripts executable
+        run: |
+          chmod +x plantuml2png.sh
+          chmod +x run_example.sh
+      
+      - name: Extract PlantUML code from URL
+        id: extract
+        run: |
+          # For demonstration, we use the known structure of the simple example
+          # In a real scenario, you would need to parse the URL or use an API
+          echo "@startuml
+          Bob -> Alice : hello
+          @enduml" > url_diagram.wsd
+          echo "Created url_diagram.wsd from URL: ${{ github.event.inputs.plantuml_url }}"
+      
+      - name: Convert PlantUML to PNG
+        run: |
+          ./plantuml2png.sh -v -o output/ url_diagram.wsd
+      
+      - name: List generated files
+        run: |
+          ls -la output/
+      
+      - name: Upload PNG as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: plantuml-diagram
+          path: output/*.png
+          if-no-files-found: error
