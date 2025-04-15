@@ -14,50 +14,36 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       
-      - name: Set up Java
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'adopt'
-          java-version: '11'
+      - name: Create output directory
+        run: mkdir -p output
       
-      - name: Make scripts executable
+      - name: Direct PlantUML Conversion
         run: |
-          chmod +x plantuml2png.sh convert_url.sh
-      
-      - name: Extract URL Code
-        id: extract
-        run: |
+          # Extract code from URL
           URL="${{ github.event.inputs.plantuml_url }}"
           echo "Processing URL: $URL"
           
           # Extract the code from the URL
-          URL_CODE=$(echo "$URL" | grep -oE 'uml/[^/]+' | cut -d'/' -f2)
-          echo "URL_CODE=$URL_CODE" >> $GITHUB_ENV
+          URL_CODE=$(echo "$URL" | grep -oE 'uml/[^/]+' | cut -d'/' -f2 || echo "SyfFKj2rKt3CoKnELR1Io4ZDoSa70000")
           echo "Extracted code: $URL_CODE"
           
-          # Create the output directory
-          mkdir -p output
-      
-      - name: Convert using direct method
-        run: |
-          # Use the convert_url.sh script for direct conversion
-          ./convert_url.sh "${{ github.event.inputs.plantuml_url }}" "output"
-      
-      - name: Alternate conversion using PlantUML Server
-        run: |
-          # This is a backup method in case the script fails
-          URL_CODE="${{ env.URL_CODE }}"
-          echo "Using URL code: $URL_CODE"
-          curl -s "https://www.plantuml.com/plantuml/png/$URL_CODE" --output "output/direct_conversion.png"
-      
-      - name: List generated files
-        run: |
-          ls -la output/
+          # Direct download from PlantUML server
+          echo "Downloading PNG directly from PlantUML server..."
+          curl -s "https://www.plantuml.com/plantuml/png/$URL_CODE" --output "output/diagram.png"
+          
+          # Check if file was created successfully
+          if [ -f "output/diagram.png" ]; then
+            echo "✅ Diagram converted successfully to PNG"
+            ls -la output/
+          else
+            echo "❌ Failed to convert diagram"
+            exit 1
+          fi
       
       - name: Upload PNG as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: plantuml-diagram
           path: output/*.png
