@@ -24,22 +24,33 @@ jobs:
       
       - name: Make scripts executable
         run: |
-          chmod +x plantuml2png.sh
-          chmod +x run_example.sh
+          chmod +x plantuml2png.sh convert_url.sh
       
-      - name: Extract PlantUML code from URL
+      - name: Extract URL Code
         id: extract
         run: |
-          # For demonstration, we use the known structure of the simple example
-          # In a real scenario, you would need to parse the URL or use an API
-          echo "@startuml
-          Bob -> Alice : hello
-          @enduml" > url_diagram.wsd
-          echo "Created url_diagram.wsd from URL: ${{ github.event.inputs.plantuml_url }}"
+          URL="${{ github.event.inputs.plantuml_url }}"
+          echo "Processing URL: $URL"
+          
+          # Extract the code from the URL
+          URL_CODE=$(echo "$URL" | grep -oE 'uml/[^/]+' | cut -d'/' -f2)
+          echo "URL_CODE=$URL_CODE" >> $GITHUB_ENV
+          echo "Extracted code: $URL_CODE"
+          
+          # Create the output directory
+          mkdir -p output
       
-      - name: Convert PlantUML to PNG
+      - name: Convert using direct method
         run: |
-          ./plantuml2png.sh -v -o output/ url_diagram.wsd
+          # Use the convert_url.sh script for direct conversion
+          ./convert_url.sh "${{ github.event.inputs.plantuml_url }}" "output"
+      
+      - name: Alternate conversion using PlantUML Server
+        run: |
+          # This is a backup method in case the script fails
+          URL_CODE="${{ env.URL_CODE }}"
+          echo "Using URL code: $URL_CODE"
+          curl -s "https://www.plantuml.com/plantuml/png/$URL_CODE" --output "output/direct_conversion.png"
       
       - name: List generated files
         run: |
