@@ -80,12 +80,42 @@ Exemplos:
 ./batch-convert.sh ./diagramas ./src
 ```
 
+### Exemplo com URL do PlantUML
+
+Você também pode converter diagramas a partir de uma URL do PlantUML:
+
+1. Obtenha o código fonte do diagrama a partir da URL e salve-o em um arquivo `.wsd`
+2. Execute o script `plantuml2png.sh` neste arquivo
+
+Por exemplo, para converter o diagrama desta URL: `https://www.plantuml.com/plantuml/uml/SyfFKj2rKt3CoKnELR1Io4ZDoSa70000`
+
+```bash
+# Extraia o código do diagrama (um diagrama simples "Bob -> Alice : hello")
+echo "@startuml
+Bob -> Alice : hello
+@enduml" > simple_diagram.wsd
+
+# Converta para PNG
+./plantuml2png.sh -v -o output/ simple_diagram.wsd
+```
+
+Para executar nosso exemplo, use o script `run_example.sh`:
+
+```bash
+# Torne o script executável
+chmod +x run_example.sh
+
+# Execute o exemplo
+./run_example.sh
+```
+
 ## Estrutura do Projeto
 
 - `plantuml2png.sh` - Script principal para conversão de arquivos individuais
 - `batch-convert.sh` - Script para processamento em lote
 - `examples/` - Diretório com exemplos de diagramas PlantUML
 - `output/` - Diretório padrão para armazenar os PNGs gerados (criado automaticamente)
+- `run_example.sh` - Script de exemplo para demonstrar a conversão do diagrama "Hello World"
 
 ## Licença
 
